@@ -26,9 +26,7 @@ import io
 import asyncio
 from typing import Dict, Any
 
-import aiofiles
-from flask import Flask, request, abort
-from dotenv import load_dotenv
+
 
 from telegram import (
     Bot, Update, InlineKeyboardButton, InlineKeyboardMarkup,
@@ -38,6 +36,10 @@ from telegram.ext import (
     Application, CommandHandler, MessageHandler, CallbackQueryHandler,
     PreCheckoutQueryHandler, ContextTypes, filters
 )
+
+import aiofiles
+from flask import Flask, request, abort
+from dotenv import load_dotenv
 
 # ------ Настройка окружения ------
 load_dotenv()
@@ -355,4 +357,5 @@ if __name__ == '__main__':
     # Flask должен слушать порт из окружения
     port = int(os.environ.get("PORT", 5000))
     flask_app.run(host='0.0.0.0', port=port, threaded=True)
+
 
