@@ -353,4 +353,5 @@ if __name__ == '__main__':
         logger.exception('Failed to initialize telegram application (this may be fine for webhooks)')
 
     # Затем запускаем Flask (в production используйте gunicorn/uvicorn и reverse proxy)
-    flask_app.run(host='0.0.0.0', port=8443, threaded=True)
+    flask_app.run(host='0.0.0.0', port=5000, threaded=True)
+
