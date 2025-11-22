@@ -345,13 +345,14 @@ async def set_webhook():
 
 # ------ Запуск приложения ------
 if __name__ == '__main__':
-    # Прежде чем запускать Flask, инициализируем application (без start_polling)
+    # Инициализация телеграм-приложения
     loop = asyncio.get_event_loop()
     try:
         loop.run_until_complete(app_telegram.initialize())
     except Exception:
         logger.exception('Failed to initialize telegram application (this may be fine for webhooks)')
 
-    # Затем запускаем Flask (в production используйте gunicorn/uvicorn и reverse proxy)
-    flask_app.run(host='0.0.0.0', port=5000, threaded=True)
+    # Flask должен слушать порт из окружения
+    port = int(os.environ.get("PORT", 5000))
+    flask_app.run(host='0.0.0.0', port=port, threaded=True)
 
