@@ -26,7 +26,9 @@ import io
 import asyncio
 from typing import Dict, Any
 
-
+import aiofiles
+from flask import Flask, request, abort
+from dotenv import load_dotenv
 
 from telegram import (
     Bot, Update, InlineKeyboardButton, InlineKeyboardMarkup,
@@ -36,10 +38,6 @@ from telegram.ext import (
     Application, CommandHandler, MessageHandler, CallbackQueryHandler,
     PreCheckoutQueryHandler, ContextTypes, filters
 )
-
-import aiofiles
-from flask import Flask, request, abort
-from dotenv import load_dotenv
 
 # ------ Настройка окружения ------
 load_dotenv()
@@ -60,7 +58,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # ------ Flask-приложение ------
-flask_app = Flask(__name__)
+
 
 # ------ Telegram Application ------
 app_telegram = Application.builder().token(BOT_TOKEN).build()
@@ -316,46 +314,8 @@ app_telegram.add_handler(MessageHandler(filters.ALL & (~filters.COMMAND), fallba
 # Для более точного поведения можно добавлять middleware. Здесь упрощённо.
 
 # ------ Flask routes для webhook ------
-@flask_app.route('/webhook', methods=['POST'])
-async def webhook():
-    if request.headers.get('content-type') != 'application/json':
-        return ('Wrong content type', 400)
-
-    data = request.get_json(force=True)
-    try:
-        update = Update.de_json(data, app_telegram.bot)
-        # process_update — async
-        await app_telegram.process_update(update)
-        return ('OK', 200)
-    except Exception:
-        logger.exception('Error while processing update')
-        return ('Internal Server Error', 500)
-
-
-@flask_app.route('/setwebhook', methods=['GET'])
-async def set_webhook():
-    if not WEBHOOK_URL:
-        return ('WEBHOOK_URL not configured', 500)
-
-    try:
-        await app_telegram.bot.set_webhook(url=WEBHOOK_URL)
-        return ('Webhook set!', 200)
-    except Exception:
-        logger.exception('Failed to set webhook')
-        return ('Failed to set webhook', 500)
 
 
 # ------ Запуск приложения ------
 if __name__ == '__main__':
-    # Инициализация телеграм-приложения
-    loop = asyncio.get_event_loop()
-    try:
-        loop.run_until_complete(app_telegram.initialize())
-    except Exception:
-        logger.exception('Failed to initialize telegram application (this may be fine for webhooks)')
-
-    # Flask должен слушать порт из окружения
-    port = int(os.environ.get("PORT", 5000))
-    flask_app.run(host='0.0.0.0', port=port, threaded=True)
-
-
+    app_telegram.run_polling()
